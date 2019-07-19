@@ -1,0 +1,19 @@
+Adapted from <a href="https://stackoverflow.com/questions/56432468/how-to-combine-key-values-from-a-json-file-to-a-geojson-map-file">here</a>
+
+(there is another method <a href="https://gis.stackexchange.com/questions/277048/joining-geojson-and-json-at-client-end-for-choropleth-map-in-leaflet
+">here</a> that works)
+
+<script src='data1.js'></script>
+<script src='data2.js'></script>
+
+<script>
+
+  data1.features.map(res => Object.assign(res, {
+  properties: {
+      ...res.properties,
+      ...data2[res.properties.ZIPCODE]
+  }
+  }))
+
+  console.log(data1)
+</script>
