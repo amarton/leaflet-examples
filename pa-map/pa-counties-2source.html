@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <title>Leaflet Test</title>
+  <title>PA Counties resentancing map</title>
   <meta name="description" content="Merrill College of Journalism, UMD">
   <meta name="author" content="Adam Marton">
 
@@ -20,30 +20,14 @@
       integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
       crossorigin=""></script>
 
-
+      <!-- Jquery call -->
       <script
       			  src="https://code.jquery.com/jquery-3.4.1.min.js"
       			  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
       			  crossorigin="anonymous"></script>
 
-
     <style>
-
-      #mapid { height: 580px; }
-
-      .legend {
-          line-height: 18px;
-          color: #555;
-
-      }
-      .legend i {
-          width: 18px;
-          height: 18px;
-          float: left;
-          margin-right: 8px;
-          opacity: 0.7;
-      }
-
+      #mapid { height: 500px;width:600px; }
     </style>
 
 
@@ -51,147 +35,34 @@
 
 <body>
 
-  <!-- use this id to call the map-->
+  <!-- This is the div that displays the map -->
   <div id="mapid"></div>
 
-  <div class="county_nam">PENNSYLVANIA</div>
-  <div class="total"><strong>211</strong> total juvenile lifers</div>
-  <div class="total_resentanced"><strong>33</strong> total resentanced</div>
-  <div class="released"><strong>12</strong> juvenile lifers have been released since 2016 </div>
-  <div class="resentanced_nonlife"><strong>9</strong> juvenile lifers have been resentenced to non-life terms</div>
-  <div class="given_life"><strong>2</strong> juvenile lifers have been given life without parole again</div>
-  <div class="waiting_resentance"><strong>7</strong> juvenile lifers are still waiting for their resentencing</div>
+
+  <!-- This div shows the resentancing number depending on what county is clicked -->
+  <div id="resentancing-data">
+    <div class="county_nam">PENNSYLVANIA</div>
+    <div class="total"><strong>211</strong> total juvenile lifers</div>
+    <div class="total_resentanced"><strong>33</strong> total resentanced</div>
+    <div class="released"><strong>12</strong> juvenile lifers have been released since 2016 </div>
+    <div class="resentanced_nonlife"><strong>9</strong> juvenile lifers have been resentenced to non-life terms</div>
+    <div class="given_life"><strong>2</strong> juvenile lifers have been given life without parole again</div>
+    <div class="waiting_resentance"><strong>7</strong> juvenile lifers are still waiting for their resentencing</div>
+  </div>
 
 
+<!-- Call in both data sources for the map-->
+  <!-- This is the geometry-->
+  <script type="text/javascript" src="pa-county.js"></script>
 
-<!-- Call in both data sources-->
-  <!-- This is the geojson with geometry-->
-<script type="text/javascript" src="pa-county.js"></script>
-  <!-- this is the json with associated values-->
-<script type="text/javascript" src="data2.js"></script>
-
-<script>
+  <!-- this is the resentancing data-->
+  <script type="text/javascript" src="data2.js"></script>
 
 
-//this function calls in the first data source, loops through the second data source and adds the values to the first data source where ZIPCODE1 matches
-paCountyData.features.map(res => Object.assign(res, {
-properties: {
-    ...res.properties,
-    ...data2[res.properties.county_nam]
-}
-}))
+<!-- This is the script that builds and controls the map-->
+<script type="text/javascript" src="map-script.js"></script>
 
 
-
-var mymap = L.map('mapid').setView([40.798511, -77.724825], 7);
-
-//call mapbox map with my access token
-L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    maxZoom: 18,
-    //use mapbox.satellite, mapbox.streets, mapbox.light, others
-    id: 'mapbox.light',
-    accessToken: 'pk.eyJ1IjoiYW1hcnRvbiIsImEiOiJjajgzdDFrdTcwMXIwMzJubmthd25jY3V2In0.01j1w1cZs1S7b7a4tiMvfg'
-}).addTo(mymap);
-
-//this adds the basic goemetry to the map
-L.geoJson(paCountyData).addTo(mymap);
-
-//select the color ramp
-function getColor(d) {
-    return d == 0 ? '#cdcdcd' :
-           d > 1000 ? '#800026' :
-           d > 500  ? '#BD0026' :
-           d > 200  ? '#E31A1C' :
-           d > 100  ? '#FC4E2A' :
-           d > 50   ? '#FD8D3C' :
-           d > 20   ? '#FEB24C' :
-           d > 10   ? '#FED976' :
-                      '#FFEDA0';
-}
-
-//select the initial feature from the geojson to add colors to
-function style(feature) {
-
-    return {
-        fillColor: getColor(feature.properties.total),
-        weight: 2,
-        opacity: 1,
-        color: 'white',
-        dashArray: '3',
-        fillOpacity: 0.7
-    };
-
-}
-
-
-// Create a function to display the data on the page -- not in a popup
-function onEachFeature(feature, layer) {
-
-
-  if (feature.properties.total == 0){
-
-    layer.on('click', function(e) {
-      $(".county_nam").html(feature.properties.county_nam + " COUNTY");
-      $(".total").html("<strong>" + feature.properties.total + "</strong> juvenile lifers");
-      $(".total_resentanced").html("");
-      $(".released").html("");
-      $(".resentanced_nonlife").html("");
-      $(".given_life").html("");
-      $(".waiting_resentance").html("");
-    });
-
-} else
-
-  layer.on('click', function(e) {
-    $(".county_nam").html(feature.properties.county_nam + " COUNTY");
-    $(".total").html("<strong>" + feature.properties.total + "</strong> total juvenile lifers");
-    $(".total_resentanced").html("<strong>" + feature.properties.total_resentanced + "</strong> total resentanced");
-    $(".released").html("<strong>" + feature.properties.released + "</strong> juvenile lifers have been released since 2016");
-    $(".resentanced_nonlife").html("<strong>" + feature.properties.resentanced_nonlife + "</strong> juvenile lifers have been resentenced to non-life terms");
-    $(".given_life").html("<strong>" + feature.properties.given_life + "</strong> juvenile lifers have been given life without parole again");
-    $(".waiting_resentance").html("<strong>" + feature.properties.waiting_resentance + "</strong> juvenile lifers are still waiting for their resentencing");
-  });
-
-
-}
-
-
-
-
-//Add the color ramps and popup to the selected initial feature
-var geojsonLayer = new L.geoJson(paCountyData, {onEachFeature: onEachFeature, style: style});
-
-geojsonLayer.addTo(mymap);
-
-
-
-
-//Create the legend
-
-var legend = L.control({position: 'bottomright'});
-
-legend.onAdd = function (map) {
-
-    var div = L.DomUtil.create('div', 'info legend'),
-        grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-        labels = [];
-
-    // loop through our density intervals and generate a label with a colored square for each interval
-    for (var i = 0; i < grades.length; i++) {
-        div.innerHTML +=
-            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
-    }
-
-    return div;
-};
-
-legend.addTo(mymap);
-
-
-
-</script>
 
 
 </body>

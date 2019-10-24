@@ -14,10 +14,5 @@ Philadelphia had 304 total juvenile lifers.
 8.9% or 27 juvenile lifers are still waiting for their resentencing.
 
 To Do:
-*Split out leaflet js
-*Clean and comment code
-*Make spreadsheet
-
-++
 Make Maryland version
-? Hide map / make white / hide legend and disable zoom ? - should do that after layout
+? Hide map / make white
